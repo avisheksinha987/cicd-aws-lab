@@ -1,0 +1,51 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform Deployment
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+
+      # 1. Checkout repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.0.0
+
+      # 3. Initialize Terraform
+      - name: Initialize Terraform
+        run: terraform init
+
+      # 4. Validate Terraform configuration
+      - name: Validate Terraform Configuration
+        run: terraform validate
+
+      # 5. Format Terraform configuration
+      - name: Check Terraform Format
+        run: terraform fmt -check
+
+      # 6. Create Terraform execution plan
+      - name: Plan Terraform Deployment
+        run: terraform plan
+
+      # 7. Apply Terraform configuration
+      - name: Apply Terraform Deployment
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
