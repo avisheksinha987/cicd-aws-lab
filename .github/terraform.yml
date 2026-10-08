@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
@@ -23,29 +24,30 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Set up Terraform
+      # 2. Install Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.0.0
 
       # 3. Initialize Terraform
-      - name: Initialize Terraform
+      - name: Terraform Init
         run: terraform init
 
       # 4. Validate Terraform configuration
-      - name: Validate Terraform Configuration
+      - name: Terraform Validate
         run: terraform validate
 
-      # 5. Format Terraform configuration
-      - name: Check Terraform Format
+      # 5. Check Terraform formatting
+      - name: Terraform Format Check
         run: terraform fmt -check
 
       # 6. Create Terraform execution plan
-      - name: Plan Terraform Deployment
+      - name: Terraform Plan
         run: terraform plan
 
       # 7. Apply Terraform configuration
-      - name: Apply Terraform Deployment
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      # Only runs when changes are pushed directly to main
+      - name: Terraform Apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
